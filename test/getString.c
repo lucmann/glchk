@@ -10,6 +10,7 @@ int main(int argc, char **argv)
 {
    char *vendor;
 
+   glutInit(&argc, argv);
    vendor = glGetString(GL_VENDOR);
 
    assert(vendor);
