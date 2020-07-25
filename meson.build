@@ -1,5 +1,17 @@
 project(
     'glchk',
     ['c'],
-    default_options:['c_std=c99']
+    default_options : ['c_std=c99'],
 )
+
+cc = meson.get_compiler('c')
+
+null_dep = dependency('', required : false)
+
+dep_dl = null_dep
+if not cc.has_function('dlopen')
+    dep_dl = cc.find_library('dl', required : true)
+endif
+
+subdir('src')
+subdir('test')
