@@ -4,13 +4,17 @@
 #include <assert.h>
 #include <stdio.h>
 #include <GL/gl.h>
-#include <GL/glut.h>
+#include <GLFW/glfw3.h>
 
 int main(int argc, char **argv)
 {
    char *vendor;
 
-   glutInit(&argc, argv);
+   /** Context Initialization */
+   glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+   GLFWwindow *os_ctx = glfwCreateWindow(640, 480, "", NULL, NULL);
+   glfwMakeContextCurrent(os_ctx);
+
    vendor = glGetString(GL_VENDOR);
 
    assert(vendor);
