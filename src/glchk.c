@@ -2,11 +2,14 @@
 // Created by luc on 2020/7/25.
 //
 
-#include "glchk.h"
+#include <GL/gl.h>
+#include "glapitable.h"
 
-extern GetString _glchk_GetString;
+extern struct _glapi_table * _tbl;
 
 GLAPI const GLubyte * GLAPIENTRY glGetString( GLenum name )
 {
-   return _glchk_GetString(GL_VENDOR);
+   glapi_func _func = ((glapi_func *) _tbl)[275];
+
+   return ((const GLubyte * (APIENTRY *)(GLenum name)) _func)(name);
 }

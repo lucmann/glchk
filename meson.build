@@ -4,6 +4,8 @@ project(
     default_options : ['c_std=c99'],
 )
 
+prog_python = import('python').find_installation('python3')
+
 cc = meson.get_compiler('c')
 
 null_dep = dependency('', required : false)
