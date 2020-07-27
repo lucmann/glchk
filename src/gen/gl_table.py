@@ -61,6 +61,7 @@ class PrintGlTable(gl_XML.gl_print_base):
         print('#endif')
         print('')
         print('typedef void (*glapi_func)(void);')
+        print('typedef GLenum (GLAPIENTRYP GetError)(void);')
         print('')
         print('struct _glapi_table')
         print('{')

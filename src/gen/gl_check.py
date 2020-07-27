@@ -33,21 +33,31 @@ import gl_XML
 
 
 header = """/**
- * \\file gl_dl.c
- * Constructor and Destructor of the Library
+ * \\file gl_check.c
+ * Wrappers of GL commands with glGetError
  */
  
 
-#include <dlfcn.h>
 #include <GL/gl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "glapitable.h"
 
-/** Globals */
-static void * gl_lib_handle;
-struct _glapi_table * _tbl;
-GetError getError;
+extern struct _glapi_table * _tbl;
+extern GetError getError; 
+
+static void _gl_check()
+{
+   GLenum err;
+   
+   while ((err = getError()) != GL_NO_ERROR)
+   {
+      switch (getError())
+      {
+      case      
+      }
+   }
+}
 
 static void _init( void ) __attribute__((constructor));
 static void _init( void )
@@ -57,15 +67,7 @@ static void _init( void )
    if (!gl_lib_handle)
    {
       printf("%s\\n", dlerror());
-      exit(EXIT_FAILURE);
-   }
-
-   getError = (GetError)dlsym(gl_lib_handle, "glGetError");
-   
-   if (!getError)
-   {
-      printf("%s\\n", "glGetError not implemented.");
-      exit(EXIT_FAILURE);
+      exit(1);
    }
 
 """
