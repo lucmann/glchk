@@ -52,60 +52,72 @@ static void _gl_check()
    
    while ((err = getError()) != GL_NO_ERROR)
    {
+      char *error; 
       switch (getError())
       {
-      case      
+      case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+      case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+      case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+      case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;  
+      case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
       }
-   }
-}
-
-static void _init( void ) __attribute__((constructor));
-static void _init( void )
-{
-   gl_lib_handle = dlopen("libGL.so", RTLD_LOCAL | RTLD_LAZY);
-
-   if (!gl_lib_handle)
-   {
-      printf("%s\\n", dlerror());
-      exit(1);
-   }
-
-"""
-
-footer = """
-}
-
-static void _fini( void ) __attribute__((destructor));
-static void _fini( void )
-{
-   int eret;
-
-   eret = dlclose(gl_lib_handle);
-
-   if (eret)
-   {
-      printf("%s\\n", dlerror());
+      
+      printf("%s: %s\\n", __func__, error);
    }
 }
 """
 
-class PrintDl(gl_XML.gl_print_base):
+class PrintGlCheck(gl_XML.gl_print_base):
     def __init__(self):
         gl_XML.gl_print_base.__init__(self)
 
         self.undef_list.append( "NAME" )
-        self.name = "gl_dl.py (from Mesa)"
+        self.name = "gl_check.py (from Mesa)"
 
     def printBody(self, api):
         for f in api.functionIterateByOffset():
-            print('   ((glapi_func *) _tbl)[%4d] = dlsym(gl_lib_handle, "NAME(%s)");' % (
-                f.offset, f.name))
+            if f.return_type != 'void':
+                self.printFunctionWithReturn(f)
+            else:
+                self.printFunctionNoReturn(f)
 
     def printRealHeader(self):
         print(header)
 
     def printRealFooter(self):
-        print(footer)
+        print('')
+
+    def _c_cast(self, f):
+        cast = '%s (GLAPIENTRY *)(%s)' % (f.return_type, f.get_parameter_string())
+
+        return cast
+
+    def printFunctionWithReturn(self, f):
+        print('')
+        print('GLAPI %s GLAPIENTRY NAME(%s)(%s)' % (f.return_type, f.name, f.get_parameter_string()))
+        print('{')
+        print('   %s retval;' % f.return_type)
+        print('')
+        print('   glapi_func _func = ((glapi_func *) _tbl)[%d];' % f.offset)
+        print('   retval = ((%s) _func)(%s);' % (self._c_cast(f), f.get_called_parameter_string()))
+        print('')
+        print('   _gl_check();')
+        print('')
+        print('   return retval;')
+        print('}')
+        print('')
+
+    def printFunctionNoReturn(self, f):
+        print('')
+        print('GLAPI %s GLAPIENTRY NAME(%s)(%s)' % (f.return_type, f.name, f.get_parameter_string()))
+        print('{')
+        print('   glapi_func _func = ((glapi_func *) _tbl)[%d];' % f.offset)
+        print('')
+        print('   ((%s) _func)(%s);' % (self._c_cast(f), f.get_called_parameter_string()))
+        print('')
+        print('   _gl_check();')
+        print('}')
+        print('')
 
 
 def _parser():
@@ -125,7 +137,7 @@ def main():
 
     api = gl_XML.parse_GL_API(args.file_name)
 
-    PrintDl().Print(api)
+    PrintGlCheck().Print(api)
 
 
 if __name__ == '__main__':

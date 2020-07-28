@@ -135,9 +135,18 @@ glapitable_h = custom_target(
 )
 
 gl_dl_c = custom_target(
-    'gldl.c',
+    'gl_dl.c',
     input : ['gl_dl.py', 'gl_API.xml'],
     output : 'gldl.c',
+    command : [prog_python, '@INPUT0@', '-f', '@INPUT1@'],
+    depend_files : glapi_gen_depends,
+    capture : true,
+)
+
+gl_check_c = custom_target(
+    'gl_check.c',
+    input : ['gl_check.py', 'gl_API.xml'],
+    output : 'gl_check.c',
     command : [prog_python, '@INPUT0@', '-f', '@INPUT1@'],
     depend_files : glapi_gen_depends,
     capture : true,
