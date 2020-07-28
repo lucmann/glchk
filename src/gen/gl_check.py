@@ -46,14 +46,15 @@ header = """/**
 extern struct _glapi_table * _tbl;
 extern GetError getError; 
 
-static void _gl_check()
+static void _gl_check(const char *func)
 {
    GLenum err;
    
    while ((err = getError()) != GL_NO_ERROR)
    {
       char *error; 
-      switch (getError())
+
+      switch (err)
       {
       case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
       case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
@@ -62,7 +63,7 @@ static void _gl_check()
       case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
       }
       
-      printf("%s: %s\\n", __func__, error);
+      printf("%s: %s\\n", func, error);
    }
 }
 """
@@ -101,7 +102,7 @@ class PrintGlCheck(gl_XML.gl_print_base):
         print('   glapi_func _func = ((glapi_func *) _tbl)[%d];' % f.offset)
         print('   retval = ((%s) _func)(%s);' % (self._c_cast(f), f.get_called_parameter_string()))
         print('')
-        print('   _gl_check();')
+        print('   _gl_check(__func__);')
         print('')
         print('   return retval;')
         print('}')
@@ -115,7 +116,7 @@ class PrintGlCheck(gl_XML.gl_print_base):
         print('')
         print('   ((%s) _func)(%s);' % (self._c_cast(f), f.get_called_parameter_string()))
         print('')
-        print('   _gl_check();')
+        print('   _gl_check(__func__);')
         print('}')
         print('')
 
