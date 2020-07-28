@@ -60,6 +60,13 @@ static void _init( void )
       exit(EXIT_FAILURE);
    }
 
+   _tbl = (struct _glapi_table *)calloc(1, sizeof(struct _glapi_table));
+   if (!_tbl)
+   {
+      printf("%s\\n", "Oops! Out of contiguous memory.");
+      exit(EXIT_FAILURE);
+   }
+
    getError = (GetError)dlsym(gl_lib_handle, "glGetError");
    
    if (!getError)
@@ -84,6 +91,8 @@ static void _fini( void )
    {
       printf("%s\\n", dlerror());
    }
+
+   free(_tbl);
 }
 """
 
